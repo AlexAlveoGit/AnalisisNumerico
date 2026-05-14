@@ -1,0 +1,43 @@
+# --- macOS ---
+.DS_Store
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+
+# Virtual environments (all common names + the typo "vena")
+.venv/
+venv/
+env/
+ENV/
+vena/
+
+# --- Flet / Flutter / Android build outputs ---
+flet_app/build/
+build/
+*.apk
+*.aab
+.gradle/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+
+# --- Reflex / Next.js ---
+.web/
+node_modules/
+.next/
+
+# --- IDE / Editor ---
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# --- Logs / temp ---
+*.log
+/tmp/
