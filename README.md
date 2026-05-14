@@ -29,12 +29,43 @@ Para **compilar el APK** también necesitas:
 
 - **Flutter SDK** → [docs.flutter.dev/get-started/install/windows](https://docs.flutter.dev/get-started/install/windows)
 - **JDK 17** (Temurin/Adoptium) → [adoptium.net](https://adoptium.net/temurin/releases/?version=17)
-- **Android Studio** (incluye el Android SDK y `cmdline-tools`) → [developer.android.com/studio](https://developer.android.com/studio)
-  - Después de instalar, abre Android Studio → **More Actions → SDK Manager** y asegúrate de tener instalado:
-    - **Android SDK Platform 36**
-    - **Android SDK Command-line Tools (latest)**
-    - **Android SDK Build-Tools**
-    - **Android SDK Platform-Tools**
+- **Android Command-line Tools** (no necesitas instalar Android Studio completo — solo el SDK)
+
+### Instalación del Android SDK sin Android Studio
+
+Solo necesitas los `cmdline-tools` de Google (~150 MB) en vez de instalar Android Studio (~3 GB).
+
+```powershell
+# 1. Descargar cmdline-tools
+$url = "https://dl.google.com/android/repository/commandlinetools-win-11076708_latest.zip"
+$sdk = "$env:LOCALAPPDATA\Android\Sdk"
+New-Item -ItemType Directory -Force -Path $sdk | Out-Null
+Invoke-WebRequest -Uri $url -OutFile "$env:TEMP\cmdline-tools.zip"
+
+# 2. Extraer y mover a la ruta esperada
+Expand-Archive "$env:TEMP\cmdline-tools.zip" -DestinationPath "$env:TEMP\cmdtools" -Force
+New-Item -ItemType Directory -Force -Path "$sdk\cmdline-tools" | Out-Null
+Move-Item "$env:TEMP\cmdtools\cmdline-tools" "$sdk\cmdline-tools\latest"
+
+# 3. Configurar variables de entorno (sesión actual)
+$env:ANDROID_HOME = $sdk
+$env:Path = "$sdk\cmdline-tools\latest\bin;$sdk\platform-tools;$env:Path"
+
+# 4. Instalar plataforma + build-tools + platform-tools (incluye adb.exe)
+sdkmanager.bat "platforms;android-36" "platform-tools" "build-tools;36.0.0"
+
+# 5. Aceptar todas las licencias (responde "y" a cada prompt o usa el truco de abajo)
+flutter doctor --android-licenses
+```
+
+> 💡 Para no tener que reconfigurar las variables cada vez, agrégalas en **Configuración de Windows → Sistema → Acerca de → Configuración avanzada del sistema → Variables de entorno** y crea `ANDROID_HOME` apuntando a `%LOCALAPPDATA%\Android\Sdk`.
+
+Verifica con:
+```powershell
+flutter doctor
+```
+
+Deberías ver `[✓] Android toolchain` (o un check verde junto a Android).
 
 ---
 
@@ -239,7 +270,11 @@ AnalisisNumerico/
 - Si tienes otra versión instalada, ajusta `$env:JAVA_HOME` apuntando a JDK 17 antes de ejecutar `flet build apk`.
 
 **`flutter doctor` indica que faltan componentes:**
-- Abre Android Studio → **SDK Manager** y asegúrate de instalar lo listado en los requisitos previos.
+- Revisa el bloque "Instalación del Android SDK sin Android Studio" en los requisitos previos.
+- Para instalar un paquete faltante específicamente (por ejemplo si dice `Android SDK Build-Tools`):
+  ```powershell
+  sdkmanager.bat "build-tools;36.0.0"
+  ```
 - Acepta las licencias del Android SDK:
   ```powershell
   flutter doctor --android-licenses
